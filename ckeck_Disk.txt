@@ -1,0 +1,52 @@
+#!/bin/bash
+# El siguiente script analiza y busca corregir errores de disco lleno en sistemas 
+# linux 
+
+#Se realiza un monitoreo del espacio del disco 
+echo "Monitoreo del disco "
+df -h 
+
+# Se muestra los 10 directorios que estan consumiendo mas recueros del disco
+echo -e "\n Directorios que mas consumen espacio son  :"
+du -ah / 2>/dev/null | sort -rh | head -n 10
+
+# Estadisticas de Input/Output del sistema ,si el ejecutar el script aparece un error como  comando 
+# iostat no encontrado ,se debe a que no lo tiene instalado en su sistema ,ejecute los siguientes comandos 
+# y ejecute de nuevo el script : 
+# sudo apt update
+# sudo apt upgrade
+# sudo apt install sysstat 
+
+echo -e "\n Estadisticas de I/O del sistema : "
+iostat -x 
+
+# Se realiza una busqueda de archivos temporales que mas consumen espacio del disco
+
+# Archivos temporales en el directorio /tmp
+echo -e "\nArchivos temporales en /tmp ,se muestran los 10 primeros :"
+find /tmp -type f -exec du -h {} + | sort -rh | head -n 10
+
+# Archivos temporales en el directorio /var/temp :"
+echo -e "\n Archivos temporales en /var/tmp ,se muestran lo 10 primeros :"
+find /var/tmp -type f -exec du -h {} + | sort -rh | head -n 10
+
+
+
+echo "Borrando archivos "
+#Se eliminan los 5  archivos tmp
+echo -e "\nEliminando archivos /tmp"
+find /tmp -type f -exec du -h {} + | sort -rh |head -n 5  | while read -r size file; do  
+	echo "Borrando $file con tamaño $size"	
+	rm -f "$file"
+done
+
+#Se eliminan los 5  archivos /var/tmp
+echo -e "\nEliminandoarchivos /var/tmp"
+find /var/tmp -type f -exec du -h {} + | sort -rh | head -n 5 | while read -r size file; do 
+	echo "Borrando $file con tamaño $size"
+	rm -f "$file"
+done
+echo "Archivos temporales borrados."
+
+
+
